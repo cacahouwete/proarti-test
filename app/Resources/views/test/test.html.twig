@@ -6,10 +6,9 @@
 
 {%  block body %}
 <h1>Select  your CSV file to load in database</h1>
-    <form method="POST" id="formo" name="formo" enctype="multipart/form-data" action="{{ path("test") }}">
+    <form method="POST" id="formo" name="formo" enctype="multipart/form-data" action="{{ path("csv") }}">
         <label>CSV file :</label>
-        <input type="text" value="test">
-        <input type="file" id="url" name="url"/>
-        <button type="submit" >Link</button>
+        <input type="file" id="url" name="url"/><br><br>
+        <button type="submit" >Load your selected file to database</button>
     </form>
 {% endblock %}

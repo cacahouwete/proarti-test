@@ -25,7 +25,7 @@ class testController extends Controller
     }
 
     /**
-     * @Route ("/loadzz")
+     * @Route ("/csv")
      */
     public function testAction(Request $request){
 
