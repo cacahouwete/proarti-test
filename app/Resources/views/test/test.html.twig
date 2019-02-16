@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    PROARTI EXAM
+{% endblock %}
+
+{%  block body %}
+<h1>Select  your CSV file to load in database</h1>
+    <form method="POST" id="formo" name="formo" enctype="multipart/form-data" action="{{ path("test") }}">
+        <label>CSV file :</label>
+        <input type="text" value="test">
+        <input type="file" id="url" name="url"/>
+        <button type="submit" >Link</button>
+    </form>
+{% endblock %}

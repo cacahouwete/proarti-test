@@ -1,0 +1,3 @@
+fresh_symfony_core_homepage:
+    path:     /
+    defaults: { _controller: FreshSymfonyCoreBundle:Default:index }

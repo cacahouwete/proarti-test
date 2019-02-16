@@ -1,0 +1,7 @@
+test_homepage:
+    path:     /
+    defaults: { _controller: TestBundle:Default:index }
+
+test:
+    path:     /load
+    defaults: { _controller: TestBundle:Default:donation }

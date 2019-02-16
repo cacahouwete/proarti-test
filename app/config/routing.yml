@@ -1,0 +1,16 @@
+test:
+    resource: "@TestBundle/Resources/config/routing.yml"
+    prefix:   /
+
+fresh_symfony_core:
+    resource: "@FreshSymfonyCoreBundle/Resources/config/routing.yml"
+    prefix:   /sqd
+
+app:
+    resource: '@AppBundle/Controller/'
+    type: annotation
+
+
+
+
+
