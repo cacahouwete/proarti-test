@@ -72,9 +72,6 @@ class Reward
         $this->quantity = $quantity;
     }
 
-    /**
-     * @return iterable
-     */
     public function getDonations(): iterable
     {
         return $this->donations;

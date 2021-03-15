@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use App\Repository\ProjectRepository;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -50,9 +49,6 @@ class Project
         $this->name = $name;
     }
 
-    /**
-     * @return iterable
-     */
     public function getRewards(): iterable
     {
         return $this->rewards;

@@ -24,7 +24,6 @@ final class CsvManager implements CsvManagerInterface
     private ProjectRepository $projectRepository;
     private RewardRepository $rewardRepository;
 
-
     public function __construct(
         EntityManagerInterface $entityManager,
         SerializerInterface $serializer,
@@ -56,35 +55,27 @@ final class CsvManager implements CsvManagerInterface
         return new ImportResult($persons, $donations, $rewards, $projects);
     }
 
-
-
-
     public function createPerson(string $filePath): void
     {
         foreach ($this->getDataFromFile($filePath) as $row) {
-
             if (isset($row['first_name'], $row['last_name'])) {
-
                 $person = $this->personRepository
                     ->findOneBy([
-                        'firstName' => ucfirst(trim($row['first_name'])),
-                        'lastName' => ucfirst(trim($row['last_name']))
+                        'firstName' => \ucfirst(\trim($row['first_name'])),
+                        'lastName' => \ucfirst(\trim($row['last_name'])),
                     ]);
 
                 if (null === $person) {
-
                     $person = new Person(
-                        ucfirst(trim($row['first_name'])),
-                        ucfirst(trim($row['last_name'])));
+                        \ucfirst(\trim($row['first_name'])),
+                        \ucfirst(\trim($row['last_name'])));
 
                     $this->entityManager->persist($person);
                 }
-
             }
 
             if (isset($row['project_name'])) {
-
-                $project = $this->projectRepository->findOneBy(['name' => trim($row['project_name'])]);
+                $project = $this->projectRepository->findOneBy(['name' => \trim($row['project_name'])]);
 
                 if (null === $project) {
                     $project = new Project($row['project_name']);
@@ -93,29 +84,27 @@ final class CsvManager implements CsvManagerInterface
             }
 
             if (isset($row['reward'])) {
-
                 $reward = $this->rewardRepository
-                    ->findOneBy(['name' => trim($row['reward'])]);
+                    ->findOneBy(['name' => \trim($row['reward'])]);
 
                 if (null === $reward) {
                     if (\is_int($row['reward_quantity'])) {
-                        $reward = new Reward(trim($row['reward']), $row['reward_quantity'], $project);
+                        $reward = new Reward(\trim($row['reward']), $row['reward_quantity'], $project);
                     } else {
-                        $reward = new Reward(trim($row['reward']), (int)($row['reward_quantity']), $project);
+                        $reward = new Reward(\trim($row['reward']), (int) ($row['reward_quantity']), $project);
                     }
                     $this->entityManager->persist($reward);
                 }
             }
 
             if (isset($row['amount'])) {
-
                 $donation = $this->donationRepository->findOneBy(['amount' => $row['amount']]);
 
                 if (null === $donation) {
                     if (\is_int($row['amount'])) {
                         $donation = new Donation($row['amount'], $person, $reward);
                     } else {
-                        $donation = new Donation((int)($row['amount']), $person, $reward);
+                        $donation = new Donation((int) ($row['amount']), $person, $reward);
                     }
                     $this->entityManager->persist($donation);
                 }
@@ -123,7 +112,6 @@ final class CsvManager implements CsvManagerInterface
 
             $this->entityManager->flush();
         }
-
     }
 
     private function getDataFromFile(string $filePath): array

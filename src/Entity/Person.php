@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use App\Repository\PersonRepository;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -66,9 +65,6 @@ class Person
         $this->lastName = $lastName;
     }
 
-    /**
-     * @return iterable
-     */
     public function getDonations(): iterable
     {
         return $this->donations;

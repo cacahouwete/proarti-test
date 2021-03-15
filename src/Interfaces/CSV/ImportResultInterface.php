@@ -22,7 +22,6 @@ interface ImportResultInterface
 
     public function countProjects(): int;
 
-
     /**
      * @return iterable<Donation>
      */

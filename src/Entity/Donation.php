@@ -34,7 +34,8 @@ class Donation
      */
     private Reward $reward;
 
-    public function __construct(float $amount, Person $person, Reward $reward) {
+    public function __construct(float $amount, Person $person, Reward $reward)
+    {
         $this->amount = $amount;
         $this->person = $person;
         $this->reward = $reward;
