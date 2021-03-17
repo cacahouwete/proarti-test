@@ -2,11 +2,8 @@
 
 namespace App\CSV;
 
-use App\Entity\Donation;
-use App\Entity\Person;
-use App\Entity\Project;
-use App\Entity\Reward;
 use App\Interfaces\CSV\CsvManagerInterface;
+use App\Interfaces\CSV\DataRecoveryManagerInterface;
 use App\Interfaces\CSV\ImportResultInterface;
 use App\Repository\DonationRepository;
 use App\Repository\PersonRepository;
@@ -23,6 +20,7 @@ final class CsvManager implements CsvManagerInterface
     private DonationRepository $donationRepository;
     private ProjectRepository $projectRepository;
     private RewardRepository $rewardRepository;
+    private DataRecoveryManagerInterface $dataRecoveryManagerInterface;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -30,7 +28,8 @@ final class CsvManager implements CsvManagerInterface
         PersonRepository $personRepository,
         DonationRepository $donationRepository,
         ProjectRepository $projectRepository,
-        RewardRepository $rewardRepository
+        RewardRepository $rewardRepository,
+        DataRecoveryManagerInterface $dataRecoveryManagerInterface
     ) {
         $this->entityManager = $entityManager;
         $this->serializer = $serializer;
@@ -38,6 +37,7 @@ final class CsvManager implements CsvManagerInterface
         $this->donationRepository = $donationRepository;
         $this->projectRepository = $projectRepository;
         $this->rewardRepository = $rewardRepository;
+        $this->dataRecoveryManagerInterface = $dataRecoveryManagerInterface;
     }
 
     /**
@@ -55,59 +55,32 @@ final class CsvManager implements CsvManagerInterface
         return new ImportResult($persons, $donations, $rewards, $projects);
     }
 
-    public function createPerson(string $filePath): void
+    public function processDataRecovery(string $filePath): void
     {
-        foreach ($this->getDataFromFile($filePath) as $row) {
+        $this->recoverData($this->getDataFromFile($filePath));
+    }
+
+    private function recoverData(array $data): void
+    {
+        foreach ($data as $row) {
+
             if (isset($row['first_name'], $row['last_name'])) {
-                $person = $this->personRepository
-                    ->findOneBy([
-                        'firstName' => \ucfirst(\trim($row['first_name'])),
-                        'lastName' => \ucfirst(\trim($row['last_name'])),
-                    ]);
-
-                if (null === $person) {
-                    $person = new Person(
-                        \ucfirst(\trim($row['first_name'])),
-                        \ucfirst(\trim($row['last_name'])));
-
-                    $this->entityManager->persist($person);
-                }
+                $person = $this->dataRecoveryManagerInterface->personRecover($row['first_name'], $row['last_name']);
             }
 
             if (isset($row['project_name'])) {
-                $project = $this->projectRepository->findOneBy(['name' => \trim($row['project_name'])]);
-
-                if (null === $project) {
-                    $project = new Project($row['project_name']);
-                    $this->entityManager->persist($project);
-                }
+                $project = $this->dataRecoveryManagerInterface->projectRecover($row['project_name']);
             }
 
-            if (isset($row['reward'])) {
-                $reward = $this->rewardRepository
-                    ->findOneBy(['name' => \trim($row['reward'])]);
-
-                if (null === $reward) {
-                    if (\is_int($row['reward_quantity'])) {
-                        $reward = new Reward(\trim($row['reward']), $row['reward_quantity'], $project);
-                    } else {
-                        $reward = new Reward(\trim($row['reward']), (int) ($row['reward_quantity']), $project);
-                    }
-                    $this->entityManager->persist($reward);
-                }
+            if (isset($row['reward'], $project)) {
+                $reward = $this->dataRecoveryManagerInterface->rewardRecover(
+                    $row['reward'],
+                    $row['reward_quantity'],
+                    $project);
             }
 
-            if (isset($row['amount'])) {
-                $donation = $this->donationRepository->findOneBy(['amount' => $row['amount']]);
-
-                if (null === $donation) {
-                    if (\is_int($row['amount'])) {
-                        $donation = new Donation($row['amount'], $person, $reward);
-                    } else {
-                        $donation = new Donation((int) ($row['amount']), $person, $reward);
-                    }
-                    $this->entityManager->persist($donation);
-                }
+            if (isset($row['amount'], $person, $reward)) {
+                $this->dataRecoveryManagerInterface->donationRecover($row['amount'], $person, $reward);
             }
 
             $this->entityManager->flush();
@@ -116,12 +89,10 @@ final class CsvManager implements CsvManagerInterface
 
     private function getDataFromFile(string $filePath): array
     {
-        $file = $filePath;
-
         /* @var string $fileString */
-        $fileString = \file_get_contents($file);
+        $fileString = \file_get_contents($filePath);
 
-        $data = $this->serializer->decode($fileString, 'csv', ['csv_delimiter' => ',']);
+        $data = $this->serializer->decode($fileString, 'csv', ['csv_delimiter' => ';']);
 
         if (\array_key_exists('results', $data)) {
             return $data['results'];

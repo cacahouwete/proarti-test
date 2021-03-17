@@ -11,4 +11,6 @@ interface CsvManagerInterface
      * @throws BadColNameExceptionInterface
      */
     public function import(SplFileInfo $file): ImportResultInterface;
+
+    public function processDataRecovery(string $filePath): void;
 }

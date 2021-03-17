@@ -4,7 +4,7 @@ namespace App\CSV;
 
 use App\Interfaces\CSV\ImportResultInterface;
 
-class ImportResult implements ImportResultInterface
+final class ImportResult implements ImportResultInterface
 {
     private iterable $persons;
     private iterable $donations;

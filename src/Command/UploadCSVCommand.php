@@ -2,9 +2,7 @@
 
 namespace App\Command;
 
-use App\CSV\CsvManager;
 use App\Interfaces\CSV\CsvManagerInterface;
-use App\Interfaces\Exceptions\BadColNameExceptionInterface;
 use SplFileObject;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -15,15 +13,12 @@ final class UploadCSVCommand extends Command
 {
     protected static $defaultName = 'app:upload-csv';
     protected CsvManagerInterface $upload;
-    private CsvManager $csvManager;
 
     public function __construct(
         CsvManagerInterface $upload,
-        CsvManager $csvManager
     ) {
         parent::__construct();
         $this->upload = $upload;
-        $this->csvManager = $csvManager;
     }
 
     protected function configure(): void
@@ -37,15 +32,9 @@ final class UploadCSVCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->csvManager->createPerson($input->getArgument('csv_file_path'));
+        $this->upload->processDataRecovery($input->getArgument('csv_file_path'));
 
-        try {
-            $result = $this->upload->import(new SplFileObject($input->getArgument('csv_file_path')));
-        } catch (BadColNameExceptionInterface $e) {
-            $output->writeln($e->getColName().$e->getMessage());
-
-            return Command::FAILURE;
-        }
+        $result = $this->upload->import(new SplFileObject($input->getArgument('csv_file_path')));
 
         $output->writeln('File uploaded');
         $output->writeln('Nb Person: '.$result->countPersons());
