@@ -36,8 +36,13 @@ resources:
   App\Entity\Reward:
     collectionOperations:
       get: ~
+      post:
+        input: App\DTO\DTOCreateReward
     itemOperations:
       get: ~
+      put:
+        input: App\DTO\DTOCreateReward
+      delete: ~
 
 
 #  POST/PUT

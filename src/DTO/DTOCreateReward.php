@@ -1,28 +1,27 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\DTO;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-class DTOCreatePerson
+class DTOCreateReward
 {
     /**
      * @Assert\Type("string")
      * @Assert\NotBlank
      */
-    public $firstName;
+    public $name;
 
     /**
-     * @Assert\Type("string")
+     * @Assert\Type("integer")
      * @Assert\NotBlank
      */
-    public $lastName;
+    public $quantity;
 
     /**
      * @Assert\Type("integer")
      * @Assert\NotNull
      */
     public $donationId;
+
 }

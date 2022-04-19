@@ -25,13 +25,12 @@ class UploadController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $csvFile = $form->get('name')->getData();
 
-            $importResult = null;
 
             if ($csvFile) {
                 $csvFileName = $fileUploader->upload($csvFile);
                 $this->addFlash('success', 'Fichier csv importé avec succès');
                 $file = new \SplFileObject($fileUploader->getTargetDirectory().'/'.$csvFileName);
-                $importResult = $csvManager->import($file);
+                $csvManager->import($file);
             }
 
             return $this->render('upload/index.html.twig', [

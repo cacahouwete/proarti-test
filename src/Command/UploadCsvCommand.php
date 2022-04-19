@@ -41,7 +41,6 @@ class UploadCsvCommand extends Command
         $output->writeln('Nb Project: '.$result->countProjects());
         $output->writeln('Nb Donation: '.$result->countDonations());
         $output->writeln('Nb Reward: '.$result->countRewards());
-        $output->writeln('');
 
         return Command::SUCCESS;
     }
