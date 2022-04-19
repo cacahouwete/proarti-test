@@ -14,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
     name: 'app:csv-load',
     description: 'Upload file of csv data',
 )]
-class UploadCsvCommand extends Command
+class UploadCommand extends Command
 {
     private CsvManagerInterface $csvManagerInterface;
 
