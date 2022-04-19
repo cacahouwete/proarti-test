@@ -2,8 +2,13 @@
 
 namespace App\Repository;
 
+use App\Entity\Project;
 use App\Entity\Reward;
+use App\Exceptions\EntityNotFoundException;
+use App\Interfaces\entities\RewardEntityInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
@@ -14,7 +19,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Reward[]    findAll()
  * @method Reward[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class RewardRepository extends ServiceEntityRepository
+class RewardRepository extends ServiceEntityRepository implements RewardEntityInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -25,7 +30,7 @@ class RewardRepository extends ServiceEntityRepository
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function add(Reward $entity, bool $flush = true): void
+    public function add(Project $entity, bool $flush = true): void
     {
         $this->_em->persist($entity);
         if ($flush) {
@@ -37,7 +42,7 @@ class RewardRepository extends ServiceEntityRepository
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function remove(Reward $entity, bool $flush = true): void
+    public function remove(Project $entity, bool $flush = true): void
     {
         $this->_em->remove($entity);
         if ($flush) {
@@ -45,32 +50,51 @@ class RewardRepository extends ServiceEntityRepository
         }
     }
 
-    // /**
-    //  * @return Reward[] Returns an array of Reward objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function findByName(string $rewardName): Reward
     {
-        return $this->createQueryBuilder('r')
-            ->andWhere('r.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('r.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
+        try {
+            return $this->createQueryBuilder('reward')
+                ->where('LOWER(reward.name) = LOWER(:rewardName)')
+                ->setParameters([
+                    'rewardName' => $rewardName,
+                ])
+                ->getQuery()
+                ->getSingleResult();
+        } catch (NoResultException $e) {
+            throw new EntityNotFoundException(Reward::class, ['name' => $rewardName]);
+        } catch (NonUniqueResultException $e) {
+            echo $e->getMessage();
+            throw $e;
+        }
     }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?Reward
+    public function persist(Reward $reward): void
     {
-        return $this->createQueryBuilder('r')
-            ->andWhere('r.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        try {
+            $this->_em->persist($reward);
+        } catch (ORMException $e) {
+        }
     }
-    */
+
+    public function persistAndFlush(Reward $reward): void
+    {
+        try {
+            $this->_em->persist($reward);
+        } catch (ORMException $e) {
+        }
+        try {
+            $this->_em->flush();
+        } catch (OptimisticLockException | ORMException $e) {
+        }
+    }
+
+    public function findById(int $id): Reward
+    {
+        return $this->createQueryBuilder('reward')
+            ->where('reward.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getSingleResult()
+            ;
+    }
 }

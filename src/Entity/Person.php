@@ -6,7 +6,9 @@ use App\Repository\PersonRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiResource;
 
+#[ApiResource]
 #[ORM\Entity(repositoryClass: PersonRepository::class)]
 class Person
 {
@@ -24,8 +26,10 @@ class Person
     #[ORM\OneToMany(mappedBy: 'person', targetEntity: Donation::class)]
     private $donations;
 
-    public function __construct()
+    public function __construct(string $firstName, string $lastName)
     {
+        $this->firstName = $firstName;
+        $this->lastName = $lastName;
         $this->donations = new ArrayCollection();
     }
 

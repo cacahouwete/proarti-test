@@ -1,0 +1,47 @@
+# api/config/api_platform/resources.yaml
+resources:
+  App\Entity\Person:
+    collectionOperations:
+      get: ~
+      post:
+        input: App\DTO\DTOCreatePerson
+    itemOperations:
+      get: ~
+      put:
+        input: App\DTO\DTOCreatePerson
+      delete: ~
+
+  App\Entity\Project:
+    collectionOperations:
+      get: ~
+      post:
+        input: App\DTO\DTOCreateProject
+    itemOperations:
+      get: ~
+      put:
+        input: App\DTO\DTOCreateProject
+      delete: ~
+
+  App\Entity\Donation:
+    collectionOperations:
+      get: ~
+      post:
+        input: App\DTO\DTOCreateDonation
+    itemOperations:
+      get: ~
+      put:
+        input: App\DTO\DTOCreateDonation
+      delete: ~
+
+  App\Entity\Reward:
+    collectionOperations:
+      get: ~
+    itemOperations:
+      get: ~
+
+
+#  POST/PUT
+#
+#  donation linked to a user, reward, project
+
+

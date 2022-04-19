@@ -3,7 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\Person;
+use App\Exceptions\EntityNotFoundException;
+use App\Interfaces\entities\PersonEntityInterface;
+use App\Interfaces\Gateways\PersonGatewayInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
@@ -14,63 +19,60 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Person[]    findAll()
  * @method Person[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class PersonRepository extends ServiceEntityRepository
+class PersonRepository extends ServiceEntityRepository implements PersonEntityInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Person::class);
     }
 
-    /**
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function add(Person $entity, bool $flush = true): void
+    public function findByFirstAndLastName(string $firstName, string $lastName): Person
     {
-        $this->_em->persist($entity);
-        if ($flush) {
-            $this->_em->flush();
+        try {
+            return $this->createQueryBuilder('person')
+                ->where('LOWER(person.firstName) = LOWER(:firstName)')
+                ->andWhere('LOWER(person.lastName) = LOWER(:lastName)')
+                ->setParameters([
+                    'firstName' => $firstName,
+                    'lastName' => $lastName,
+                ])
+                ->getQuery()
+                ->getSingleResult();
+        } catch (NoResultException $e) {
+            throw new EntityNotFoundException(Person::class, ['firstName' => $firstName, 'lastName' => $lastName]);
+        } catch (NonUniqueResultException $e) {
+            echo $e->getMessage();
+            throw $e;
         }
     }
 
-    /**
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function remove(Person $entity, bool $flush = true): void
+    public function persist(Person $person): void
     {
-        $this->_em->remove($entity);
-        if ($flush) {
-            $this->_em->flush();
+        try {
+            $this->_em->persist($person);
+        } catch (ORMException $e) {
         }
     }
 
-    // /**
-    //  * @return Person[] Returns an array of Person objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function persistAndFlush(Person $person): void
     {
-        return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('p.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
+        try {
+            $this->_em->persist($person);
+        } catch (ORMException $e) {
+        }
+        try {
+            $this->_em->flush();
+        } catch (OptimisticLockException | ORMException $e) {
+        }
     }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?Person
+    public function findById(int $id): Person
     {
-        return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
+        return $this->createQueryBuilder('person')
+            ->where('person.id = :id')
+            ->setParameter('id', $id)
             ->getQuery()
-            ->getOneOrNullResult()
-        ;
+            ->getSingleResult()
+            ;
     }
-    */
 }

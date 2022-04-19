@@ -6,7 +6,9 @@ use App\Repository\ProjectRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiResource;
 
+#[ApiResource]
 #[ORM\Entity(repositoryClass: ProjectRepository::class)]
 class Project
 {
@@ -21,8 +23,9 @@ class Project
     #[ORM\OneToMany(mappedBy: 'project', targetEntity: Reward::class)]
     private $rewards;
 
-    public function __construct()
+    public function __construct(string $name)
     {
+        $this->name = $name;
         $this->rewards = new ArrayCollection();
     }
 

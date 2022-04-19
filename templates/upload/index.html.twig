@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Ajout d'un fichier csv</h1>
+    {{ form_start(form) }}
+    {{ form_row(form.name) }}
+    {{ form_end(form) }}
+    <h2>Person</h2>
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="thead-inverse">
+        <tr>
+            <th>Prénom</th>
+            <th>Nom </th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for person in persons %}
+            <tr>
+                <td>{{ person.getFirstName }}</td>
+                <td>{{ person.getLastName }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">Table empty!</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <h2>Project</h2>
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="thead-inverse">
+        <tr>
+            <th>Nom</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for project in projects %}
+            <tr>
+                <td>{{ project.getName }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">Table empty!</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+
+
+
+{% endblock %}

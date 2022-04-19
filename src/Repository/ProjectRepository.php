@@ -3,7 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\Project;
+use App\Exceptions\EntityNotFoundException;
+use App\Interfaces\entities\ProjectEntityInterface;
+use App\Interfaces\Gateways\ProjectGatewayInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
@@ -14,63 +19,48 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Project[]    findAll()
  * @method Project[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ProjectRepository extends ServiceEntityRepository
+class ProjectRepository extends ServiceEntityRepository implements ProjectEntityInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Project::class);
     }
 
-    /**
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function add(Project $entity, bool $flush = true): void
+    public function findByName(string $name): Project
     {
-        $this->_em->persist($entity);
-        if ($flush) {
-            $this->_em->flush();
+        try {
+            return $this->createQueryBuilder('project')
+                ->where('LOWER(project.name) = LOWER(:name)')
+                ->setParameters([
+                    'name' => $name,
+                ])
+                ->getQuery()
+                ->getSingleResult();
+        } catch (NoResultException $e) {
+            throw new EntityNotFoundException(Project::class, ['name' => $name]);
+        } catch (NonUniqueResultException $e) {
+            echo $e->getMessage();
+            throw $e;
         }
     }
 
-    /**
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function remove(Project $entity, bool $flush = true): void
+    public function persist(Project $project): void
     {
-        $this->_em->remove($entity);
-        if ($flush) {
-            $this->_em->flush();
+        try {
+            $this->_em->persist($project);
+        } catch (ORMException $e) {
         }
     }
 
-    // /**
-    //  * @return Project[] Returns an array of Project objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function persistAndFlush(Project $project): void
     {
-        return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('p.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
+        try {
+            $this->_em->persist($project);
+        } catch (ORMException $e) {
+        }
+        try {
+            $this->_em->flush();
+        } catch (OptimisticLockException | ORMException $e) {
+        }
     }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?Project
-    {
-        return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

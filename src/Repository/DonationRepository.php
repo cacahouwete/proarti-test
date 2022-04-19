@@ -3,7 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\Donation;
+use App\Entity\Person;
+use App\Interfaces\entities\DonationEntityInterface;
+use App\Interfaces\Gateways\DonationGatewayInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
@@ -14,17 +19,47 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Donation[]    findAll()
  * @method Donation[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class DonationRepository extends ServiceEntityRepository
+class DonationRepository extends ServiceEntityRepository implements DonationEntityInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Donation::class);
     }
 
+    public function persist(Donation $donation): void
+    {
+        try {
+            $this->_em->persist($donation);
+        } catch (ORMException $e) {
+        }
+    }
+
+    public function persistAndFlush(Donation $donation): void
+    {
+        try {
+            $this->_em->persist($donation);
+        } catch (ORMException $e) {
+        }
+        try {
+            $this->_em->flush();
+        } catch (OptimisticLockException | ORMException $e) {
+        }
+    }
+
     /**
-     * @throws ORMException
-     * @throws OptimisticLockException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
+    public function getDonationsTotalAmountPerPerson(Person $person): int
+    {
+        $query = $this->createQueryBuilder('donations')
+            ->select('SUM(donations.amount) as sum')
+            ->andWhere('donations.person = :person')
+            ->setParameter('person', $person);
+
+        return (int) $query->getQuery()->getSingleScalarResult();
+    }
+
     public function add(Donation $entity, bool $flush = true): void
     {
         $this->_em->persist($entity);
@@ -33,10 +68,6 @@ class DonationRepository extends ServiceEntityRepository
         }
     }
 
-    /**
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function remove(Donation $entity, bool $flush = true): void
     {
         $this->_em->remove($entity);
@@ -44,33 +75,4 @@ class DonationRepository extends ServiceEntityRepository
             $this->_em->flush();
         }
     }
-
-    // /**
-    //  * @return Donation[] Returns an array of Donation objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('d')
-            ->andWhere('d.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('d.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?Donation
-    {
-        return $this->createQueryBuilder('d')
-            ->andWhere('d.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

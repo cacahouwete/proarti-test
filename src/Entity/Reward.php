@@ -6,7 +6,9 @@ use App\Repository\RewardRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiResource;
 
+#[ApiResource]
 #[ORM\Entity(repositoryClass: RewardRepository::class)]
 class Reward
 {
@@ -27,9 +29,12 @@ class Reward
     #[ORM\ManyToOne(targetEntity: Project::class, inversedBy: 'rewards')]
     private $project;
 
-    public function __construct()
+    public function __construct(string $name, int $quantity, Project $project)
     {
+        $this->name = $name;
+        $this->quantity = $quantity;
         $this->donations = new ArrayCollection();
+        $this->project = $project;
     }
 
     public function getId(): ?int

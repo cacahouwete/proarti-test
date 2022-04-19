@@ -4,7 +4,9 @@ namespace App\Entity;
 
 use App\Repository\DonationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiResource;
 
+#[ApiResource]
 #[ORM\Entity(repositoryClass: DonationRepository::class)]
 class Donation
 {
@@ -13,7 +15,7 @@ class Donation
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[ORM\Column(type: 'float')]
+    #[ORM\Column(type: 'integer')]
     private $amount;
 
     #[ORM\ManyToOne(targetEntity: Person::class, inversedBy: 'donations')]
@@ -21,6 +23,13 @@ class Donation
 
     #[ORM\ManyToOne(targetEntity: Reward::class, inversedBy: 'donations')]
     private $reward;
+
+    public function __construct(int $amount, Person $person, Reward $reward)
+    {
+        $this->amount = $amount;
+        $this->person = $person;
+        $this->reward = $reward;
+    }
 
     public function getId(): ?int
     {
