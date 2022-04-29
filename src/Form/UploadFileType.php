@@ -16,7 +16,7 @@ class UploadFileType extends AbstractType
     {
         $builder
             ->add('csv', FileType::class, [
-                'label' => 'Data (CSV file)',
+                'label' => 'Upload csv file',
                 'mapped' => false,
                 'required' => false,
                 'constraints' => [

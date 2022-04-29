@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Upload CSV{% endblock %}
+
+{% block body %}
+
+<div class="container p-5">
+    <row>
+        <h1>Upload csv file</h1>
+        {{ form_start(form) }}
+            {{ form_row(form.csv) }}
+        {{ form_end(form) }}
+
+        {% for message in app.flashes('success') %}
+        <div class="alert alert-success mt-5" role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+
+
+
+        <table class="table">
+        <thead>
+            <tr>
+            <th scope="col">Les projets</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for projects in project %}
+            <tr>
+            <td>{{ projects.getProjectName }}</td>
+            </tr>
+            {% else %}
+            <div class="alert alert-warning mt-5" role="alert">There is no current project</div>
+            {% endfor %}
+        </tbody>
+        </table>
+
+    </row>
+</div>
+
+{% endblock %}

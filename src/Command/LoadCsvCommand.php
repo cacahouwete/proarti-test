@@ -1,14 +1,13 @@
 <?php
 namespace App\Command;
 
-use App\Service\CsvService;
-use App\Service\DataService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use App\Service\CsvService;
 
 #[AsCommand(
     name: 'app:csv-load',
@@ -18,12 +17,9 @@ class LoadCsvCommand extends Command
 {
     private $csvService;
 
-    private $dataService;
-
-    public function __construct(CsvService $csvService, DataService $dataService)
+    public function __construct(CsvService $csvService)
     {
         $this->csvService = $csvService;
-        $this->dataService = $dataService;
         parent::__construct();
     }
 
@@ -44,10 +40,11 @@ class LoadCsvCommand extends Command
 			return Command::FAILURE;
 		}
 
-        $rows = $this->csvService->csvToArray($path);
-        $this->dataService->setAllData($rows);
+        $rows = $this->csvService->getDataCsv($path);
+        $this->csvService->persistDataCsv($rows);
 
         $io->success('CSV data loaded to Database');
+        $io->table($rows, []);
 
         return Command::SUCCESS;
     }

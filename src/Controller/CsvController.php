@@ -4,7 +4,6 @@ namespace App\Controller;
 use App\Form\UploadFileType;
 use App\Repository\ProjectRepository;
 use App\Service\CsvService;
-use App\Service\DataService;
 use App\Service\UploadFileService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,9 +12,9 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class CsvController extends AbstractController {
     /**
-     * @Route("/", name="csv_upload")
+     * @Route("/", name="upload_csv")
      */
-    public function home(Request $request, UploadFileService $uploadFile, CsvService $csvService, DataService $dataService, ProjectRepository $projectRepository): Response
+    public function home(Request $request, UploadFileService $uploadFile, CsvService $csvService, ProjectRepository $projectRepository): Response
     {
         $form = $this->createForm(UploadFileType::class);
         $form->handleRequest($request);
@@ -27,17 +26,16 @@ class CsvController extends AbstractController {
                 $csvFileName = $uploadFile->upload($csvFile);
                 $this->addFlash("success", "File uploaded with success");
                 $path = $uploadFile->getTargetDirectory().'/'.$csvFileName;
-                $rows = $csvService->csvToArray($path);
-                $dataService->setAllData($rows);
+                $rows = $csvService->getDataCsv($path);
+                $csvService->persistDataCsv($rows);
             }
 
-            
-            return $this->render('home.html.twig', [
+            return $this->render('upload.html.twig', [
                 'form' => $form->createView(),
                 'project' => $projectRepository->findAll(),
             ]);
         }
-        return $this->render('home.html.twig', [
+        return $this->render('upload.html.twig', [
             'form' => $form->createView(),
             'project' => $projectRepository->findAll(),
         ]);
